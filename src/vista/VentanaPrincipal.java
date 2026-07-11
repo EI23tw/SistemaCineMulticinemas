@@ -54,7 +54,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         modelo.Pelicula peliSeleccionada = lista.get(index);
 
         // 3. Le pedimos al controlador la Matriz de Asientos exacta para esa sala
-        estructuras.MatrizAsientos matrizSala = controlador.getSala(peliSeleccionada.getNumeroSala());
+        estructuras.MatrizAsientos matrizSala = peliSeleccionada.getSalaAsientos();
 
         // 4. Le decimos al panel que su cuadrícula debe ser del tamaño exacto de la matriz
         panelAsientos.setLayout(new java.awt.GridLayout(matrizSala.getFilas(), matrizSala.getColumnas(), 5, 5));
@@ -199,7 +199,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         comboPeliculas.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         comboPeliculas.addActionListener(this::comboPeliculasActionPerformed);
 
-        panelAsientos.setLayout(new java.awt.GridLayout());
+        panelAsientos.setLayout(new java.awt.GridLayout(1, 0));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -316,7 +316,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jTabbedPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(9, Short.MAX_VALUE))
+                .addContainerGap(102, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

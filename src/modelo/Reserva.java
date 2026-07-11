@@ -6,7 +6,7 @@ public class Reserva {
     
     private int idReserva;
     private String nombreCliente;
-    private Pelicula pelicula;
+    private Pelicula pelicula; //composición
     private String asientosReservados; // Guardaremos los nombres visuales, ej: "A1, A2"
     private double totalPagar;
 

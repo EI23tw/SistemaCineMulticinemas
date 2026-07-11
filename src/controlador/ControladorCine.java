@@ -2,7 +2,6 @@ package controlador;
 
 import estructuras.ArbolPeliculas;
 import estructuras.ColaReservas;
-import estructuras.MatrizAsientos;
 import modelo.Pelicula;
 import modelo.Reserva;
 import java.util.List;
@@ -12,27 +11,29 @@ public class ControladorCine {
     // Instanciamos nuestras 3 estructuras de datos obligatorias
     private ArbolPeliculas catalogoPeliculas;
     private ColaReservas colaCompras;
-    // Un arreglo de matrices para manejar múltiples salas (ej. 3 salas en el cine)
-    private MatrizAsientos[] salas;
 
     public ControladorCine() {
         this.catalogoPeliculas = new ArbolPeliculas();
         this.colaCompras = new ColaReservas();
-        this.salas = new MatrizAsientos[3]; 
-
-        // Inicializamos las matrices de asientos (ej. salas pequeñas de 5 filas x 5 columnas)
-        for (int i = 0; i < 3; i++) {
-            salas[i] = new MatrizAsientos(5, 5);
-        }
-
         cargarDatosDePrueba();
     }
 
     // Como no podemos usar bases de datos, cargamos datos en memoria al iniciar
     private void cargarDatosDePrueba() {
+        // ============================================================
+        // PROGRAMACIÓN: SALA 1 (Horarios: 15:40 | 18:00 | 20:20)
+        // ============================================================
+        catalogoPeliculas.insertar(new Pelicula("Shrek", "Comedia", "15:40", 1));
         catalogoPeliculas.insertar(new Pelicula("Avengers", "Acción", "18:00", 1));
-        catalogoPeliculas.insertar(new Pelicula("Interstellar", "Ciencia Ficción", "20:00", 2));
-        catalogoPeliculas.insertar(new Pelicula("Shrek", "Comedia", "16:00", 3));
+        catalogoPeliculas.insertar(new Pelicula("El Padrino", "Drama", "20:20", 1));
+        // PROGRAMACIÓN: SALA 2 (Horarios: 16:15 | 19:40 | 22:00)
+        catalogoPeliculas.insertar(new Pelicula("El Laberinto del Fauno", "Fantasía", "16:15", 2));
+        catalogoPeliculas.insertar(new Pelicula("El Caballero de la Noche", "Acción", "19:40", 2));
+        catalogoPeliculas.insertar(new Pelicula("Interstellar", "Ciencia Ficción", "22:00", 2));
+        // PROGRAMACIÓN: SALA 3 (Horarios: 15:40 | 19:40 | 22:40)
+        catalogoPeliculas.insertar(new Pelicula("Titanic", "Romance", "15:40", 3));
+        catalogoPeliculas.insertar(new Pelicula("Alien", "Terror", "19:40", 3));
+        catalogoPeliculas.insertar(new Pelicula("Manchester Frente al Mar", "Drama", "22:40", 3));
     }
 
     // --- FUNCIONALIDAD 1: Consultar películas disponibles ---
@@ -61,12 +62,6 @@ public class ControladorCine {
         return filtradas;
     }
 
-    // Método de apoyo para obtener los asientos de una película/sala
-    public MatrizAsientos getSala(int numeroSala) {
-        // Restamos 1 porque los arreglos en Java empiezan en 0, pero las salas en 1
-        return salas[numeroSala - 1];
-    }
-
     // --- FUNCIONALIDAD 2: Reservar asientos (Encola reserva) ---
     public void registrarReserva(String cliente, Pelicula p, String asientos, double total) {
         Reserva nuevaReserva = new Reserva(cliente, p, asientos, total);
@@ -78,23 +73,42 @@ public class ControladorCine {
         return colaCompras.desencolar(); // Atendemos al primero en la fila
     }
 
-    // --- FUNCIONALIDAD 4: Generar reporte de ocupación ---
+    // --- FUNCIONALIDAD 4: Generar reporte de ocupación mejorado ---
     public String generarReporteOcupacion(int numeroSala) {
-        MatrizAsientos sala = getSala(numeroSala);
-        int totalAsientos = sala.getFilas() * sala.getColumnas();
-        int ocupados = 0;
+        int ocupadosTotal = 0;
+        int disponiblesTotal = 0;
+        
+        StringBuilder reporte = new StringBuilder();
+        reporte.append("=== REPORTE SALA ").append(numeroSala).append(" ===\n\n");
 
-        for (int i = 0; i < sala.getFilas(); i++) {
-            for (int j = 0; j < sala.getColumnas(); j++) {
-                if (sala.getAsiento(i, j).isOcupado()) {
-                    ocupados++;
+        // Recorremos el árbol de películas
+        for (Pelicula p : catalogoPeliculas.obtenerPeliculasOrdenadas()) {
+            
+            // Filtramos solo las películas que se proyectan en esta sala
+            if (p.getNumeroSala() == numeroSala) {
+                estructuras.MatrizAsientos m = p.getSalaAsientos();
+                int ocupados = 0;
+                int totalAsientos = m.getFilas() * m.getColumnas();
+                
+                for (int i = 0; i < m.getFilas(); i++) {
+                    for (int j = 0; j < m.getColumnas(); j++) {
+                        if (m.getAsiento(i, j).isOcupado()) ocupados++;
+                    }
                 }
+                
+                int disponibles = totalAsientos - ocupados;
+                ocupadosTotal += ocupados;
+                disponiblesTotal += disponibles;
+                
+                reporte.append("- ").append(p.getTitulo()).append(" (").append(p.getHorario()).append(")\n");
+                reporte.append("  Vendidos: ").append(ocupados).append(" | Libres: ").append(disponibles).append("\n");
             }
         }
         
-        int disponibles = totalAsientos - ocupados;
-        return "Estadísticas Sala " + numeroSala + ":\n" +
-               "Asientos Vendidos: " + ocupados + "\n" +
-               "Asientos Disponibles: " + disponibles;
+        reporte.append("\n===========================\n");
+        reporte.append("TOTAL VENDIDOS EN LA SALA: ").append(ocupadosTotal).append("\n");
+        reporte.append("TOTAL LIBRES EN LA SALA: ").append(disponiblesTotal).append("\n");
+        
+        return reporte.toString();
     }
 }

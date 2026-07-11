@@ -1,6 +1,7 @@
 package modelo;
 
 public class Asiento {
+    //atributos
     private int fila;
     private int columna;
     private boolean ocupado;
